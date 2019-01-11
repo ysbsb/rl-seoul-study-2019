@@ -1,3 +1,6 @@
+"""
+Play FrozenLake-v3
+"""
 import gym
 from gym.envs.registration import register
 import sys, tty, termios

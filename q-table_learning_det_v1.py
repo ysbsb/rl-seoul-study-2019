@@ -1,3 +1,6 @@
+"""
+Q Table learning choosing acton greedily with noise and decay rate
+"""
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,15 +31,10 @@ for i in range(num_episodes):
     rAll = 0
     done = False
 
-    e = 1./((1 // 100) + 1)
-
     # The Q-Table learning algorithm
     while not done:
-        # Choose an action by e greedy
-        if np.random.rand(1) < e:
-            action = env.action_space.sample()
-        else
-            action = np.argmax(Q[state, :])
+        # Choose an action by greedily (with noise) piking form Q table
+        action = np.argmax(Q[state, :] + np.random.randn(1, env.action_space.n) / (0.01*(i+1)))
 
         # Get new state and reward from environment
         new_state, reward, done, _ = env.step(action)

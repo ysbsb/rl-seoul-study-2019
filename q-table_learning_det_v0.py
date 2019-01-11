@@ -1,7 +1,19 @@
+"""
+Dummy Q-Table learning
+"""
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from gym.envs.registration import register
+import random as pr
+
+
+def rargmax(vector):
+    """Argmax that choose randomly among eligible maximum indicies."""
+    m = np.amax(vector)
+    indices = np.nonzero(vector == m)[0]
+    return pr.choice(indices)
+
 
 # Register FrozenLake with is_slippery False
 register(
@@ -15,29 +27,26 @@ env.render()  # Show the initial board
 
 # Initialize table with all zeros
 Q = np.zeros([env.observation_space.n, env.action_space.n])
-# Discount factor
-dis = .99
 # Set learning parameters
 num_episodes = 2000
 
-# create lists to contain totoal rewards and steps per episode
+# create lists to contain total rewards and steps per episode
 rList = []
 for i in range(num_episodes):
-    # Reset environment and get first new obervation
+    # Reset environment and get first new observation
     state = env.reset()
     rAll = 0
     done = False
 
     # The Q-Table learning algorithm
     while not done:
-        # Chooese an action by greedily (with noise) piking form Q table
-        action = np.argmax(Q[state, :] + np.random.randn(1, env.action_space.n) / (0.01*(i+1)))
+        action = rargmax(Q[state, :])
 
         # Get new state and reward from environment
         new_state, reward, done, _ = env.step(action)
 
-        # Update Q-Table with new knowledge using decay rate
-        Q[state, action] = reward + dis * np.max(Q[new_state, :])
+        # Updae Q-Table with new knowledge using learning rate
+        Q[state, action] = reward + np.max(Q[new_state, :])
 
         rAll += reward
         state = new_state

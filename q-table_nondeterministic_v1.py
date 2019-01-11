@@ -1,49 +1,36 @@
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
-from gym.envs.registration import register
-import random as pr
 
-
-def rargmax(vector):
-    """Argmax that choose randomly among eligible maximum indicies."""
-    m = np.amax(vector)
-    indices = np.nonzero(vector == m)[0]
-    return pr.choice(indices)
-
-
-# Register FrozenLake with is_slippery False
-register(
-    id='FrozenLake-v3',
-    entry_point='gym.envs.toy_text:FrozenLakeEnv',
-    kwargs={'map_name' : '4x4', 'is_slippery' : False}
-)
-
-env = gym.make('FrozenLake-v3')
+env = gym.make('FrozenLake-v0')
 env.render()  # Show the initial board
 
 # Initialize table with all zeros
 Q = np.zeros([env.observation_space.n, env.action_space.n])
+
 # Set learning parameters
+learning_rate = .85
+dis = .99  # Discount factor
 num_episodes = 2000
 
-# create lists to contain totoal rewards and steps per episode
+# create lists to contain total rewards and steps per episode
 rList = []
 for i in range(num_episodes):
-    # Reset environment and get first new obervation
+    # Reset environment and get first new observation
     state = env.reset()
     rAll = 0
     done = False
 
     # The Q-Table learning algorithm
     while not done:
-        action = rargmax(Q[state, :])
+        # Choose an action by greedily (with noise) piking form Q table
+        action = np.argmax(Q[state, :] + np.random.randn(1, env.action_space.n) / (i + 1))
 
         # Get new state and reward from environment
         new_state, reward, done, _ = env.step(action)
 
-        # Updae Q-Table with new knowledge using learning rate
-        Q[state, action] = reward + np.max(Q[new_state, :])
+        # Update Q-Table with new knowledge using decay rate
+        Q[state, action] = (1-learning_rate) * Q[state, action] + learning_rate *(reward + dis * np.max(Q[new_state, :]))
 
         rAll += reward
         state = new_state
